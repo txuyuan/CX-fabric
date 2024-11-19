@@ -1,5 +1,7 @@
 package me.xuyuan.cx
 
+import me.xuyuan.cx.commands.CHomeCommand
+import me.xuyuan.cx.utils.CHomeFileHandler
 import net.fabricmc.api.ModInitializer
 import org.slf4j.LoggerFactory
 
@@ -11,7 +13,6 @@ object CX : ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		logger.info("Hello Fabric world!")
-		KotlinTest.init()
-		CommandTest.init()
+		CHomeCommand.init()
 	}
 }
