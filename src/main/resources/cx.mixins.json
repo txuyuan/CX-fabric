@@ -1,10 +1,8 @@
 {
-	"required": true,
+	"required": false,
 	"package": "me.xuyuan.cx.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"ExampleMixin"
-	],
+	"mixins": [],
 	"injectors": {
 		"defaultRequire": 1
 	}

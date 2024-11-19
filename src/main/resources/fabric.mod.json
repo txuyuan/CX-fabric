@@ -20,21 +20,8 @@
 				"value": "me.xuyuan.cx.CX",
 				"adapter": "kotlin"
 			}
-		],
-		"client": [
-			{
-				"value": "me.xuyuan.cx.CXClient",
-				"adapter": "kotlin"
-			}
 		]
 	},
-	"mixins": [
-		"cx.mixins.json",
-		{
-			"config": "cx.client.mixins.json",
-			"environment": "client"
-		}
-	],
 	"depends": {
 		"fabricloader": ">=0.16.9",
 		"minecraft": "~1.21.3",

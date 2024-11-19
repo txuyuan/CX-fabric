@@ -2,7 +2,8 @@ package me.xuyuan.cx.commands
 
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.context.CommandContext
-import me.xuyuan.cx.utils.CHomeFileHandler
+import me.xuyuan.cx.utils.CHomeStateHandler
+import me.xuyuan.cx.visuals.TeleportParticles
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
@@ -22,10 +23,11 @@ object CHomeCommand {
                         CommandManager.literal("sethome")
                             .executes(sethomeCommand)
                     )
-                    .executes(defaultCommand)
+                    .executes(helpCommand)
             )
         }
     }
+
 
     private fun executeHome(context: CommandContext<ServerCommandSource>): Int {
         try {
@@ -35,14 +37,21 @@ object CHomeCommand {
 
             // Execute teleport
             val player = context.source.player!!
-            val homepos = CHomeFileHandler.getHome(player)
+            val home = CHomeStateHandler.getHome(player)
 
-            player.teleport(homepos.x, homepos.y, homepos.z, true)
+            // Check for existence of home
+            if (home != null) {
+                player.teleport(home.x, home.y, home.z, true)
 
-            // Return feedback
-            context.source.sendFeedback({
-                Text.literal("Called /chome home")
-            }, false)
+                // Return feedback
+                context.source.sendFeedback({
+                    Text.literal("Teleported to home")
+                }, false)
+            } else {
+                context.source.sendFeedback({
+                    Text.literal("You have not set your home. Use /chome sethome at your preferred home")
+                }, false)
+            }
 
         } catch (e: Exception) {
             context.source.sendFeedback({
@@ -64,7 +73,10 @@ object CHomeCommand {
             // Execute save
             val player = context.source.player!!
             val pos = player.pos
-            CHomeFileHandler.saveHome(player, pos)
+            CHomeStateHandler.saveHome(player, pos)
+
+            // Spawn particles
+            TeleportParticles.spawn(player)
 
             // Return feedback
             context.source.sendFeedback({
@@ -82,12 +94,12 @@ object CHomeCommand {
 
     val sethomeCommand = Command(CHomeCommand::executeSethome)
 
-    private fun executeDefault(context: CommandContext<ServerCommandSource>): Int {
+    private fun executeHelp(context: CommandContext<ServerCommandSource>): Int {
         context.source.sendFeedback({
-            Text.literal("Called /chome with no args")
+            Text.literal("Usage: ${context.command} [home | sethome]")
         }, false)
         return 1
     }
 
-    val defaultCommand = Command(CHomeCommand::executeDefault)
+    val helpCommand = Command(CHomeCommand::executeHelp)
 }
