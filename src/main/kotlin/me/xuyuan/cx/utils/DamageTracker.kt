@@ -7,6 +7,7 @@ import java.time.ZoneId
 import java.util.UUID
 
 object DamageTracker {
+    // TODO: Refactor to config file
     const val DAMAGECOOLDOWN = 20
 
     // Main record store, kept in memory

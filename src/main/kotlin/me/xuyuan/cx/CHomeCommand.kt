@@ -2,7 +2,7 @@ package me.xuyuan.cx
 
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.context.CommandContext
-import me.xuyuan.cx.utils.CHomeStateHandler
+import me.xuyuan.cx.utils.HomeStoreHandler
 import me.xuyuan.cx.utils.DamageTracker
 import me.xuyuan.cx.visuals.TeleportParticles
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
@@ -49,7 +49,7 @@ object CHomeCommand {
             }
 
             // Check for existence of home
-            val home = CHomeStateHandler.getHome(player)
+            val home = HomeStoreHandler.getHome(player)
             if (home == null) {
                 context.source.sendFeedback({
                     Text.literal("You have not set your home. Use /chome sethome at your preferred home")
@@ -83,7 +83,7 @@ object CHomeCommand {
             // Execute save
             val player = context.source.player!!
             val pos = player.pos
-            CHomeStateHandler.saveHome(player, pos)
+            HomeStoreHandler.saveHome(player, pos)
 
             // Spawn fancy particles
             TeleportParticles.spawn(player)

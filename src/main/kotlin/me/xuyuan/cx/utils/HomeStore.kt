@@ -11,7 +11,7 @@ import net.minecraft.world.World
 import java.util.*
 import java.util.function.Supplier
 
-class CHomeState: PersistentState() {
+class HomeStore: PersistentState() {
     // Store as map of player UUIDs and Vec3d instances
     private val playerData: MutableMap<UUID,Vec3d> = mutableMapOf()
 
@@ -31,9 +31,9 @@ class CHomeState: PersistentState() {
 
     // Map from NBT back to state
     companion object {
-        fun createFromNbt(tag: NbtCompound, registryLookup: WrapperLookup?): CHomeState {
+        fun createFromNbt(tag: NbtCompound, registryLookup: WrapperLookup?): HomeStore {
             // Init object reference
-            val state = CHomeState()
+            val state = HomeStore()
 
             // Grab NBT data
             val playerNbt = tag.getCompound("chome_homes")
@@ -53,13 +53,13 @@ class CHomeState: PersistentState() {
             return state
         }
 
-        private val type: Type<CHomeState> = Type<CHomeState>(
-            Supplier<CHomeState> { CHomeState() },  // If there's no 'StateSaverAndLoader' yet create one
-            CHomeState::createFromNbt,  // If there is a 'StateSaverAndLoader' NBT, parse it with 'createFromNbt'
+        private val type: Type<HomeStore> = Type<HomeStore>(
+            Supplier<HomeStore> { HomeStore() },  // If there's no 'StateSaverAndLoader' yet create one
+            HomeStore::createFromNbt,  // If there is a 'StateSaverAndLoader' NBT, parse it with 'createFromNbt'
             null // Supposed to be an 'DataFixTypes' enum, but we can just pass null
         )
 
-        fun getCHomeState(server: MinecraftServer): CHomeState {
+        fun getCHomeState(server: MinecraftServer): HomeStore {
             val persistentStateManager = server.getWorld(World.OVERWORLD)!!.persistentStateManager
             val state = persistentStateManager.getOrCreate(type, "cx")
             state.markDirty()
