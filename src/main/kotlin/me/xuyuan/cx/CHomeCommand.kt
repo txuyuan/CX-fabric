@@ -2,6 +2,7 @@ package me.xuyuan.cx
 
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.context.CommandContext
+import me.xuyuan.cx.utils.ConfigHandler
 import me.xuyuan.cx.utils.HomeStoreHandler
 import me.xuyuan.cx.utils.DamageTracker
 import me.xuyuan.cx.visuals.TeleportParticles
@@ -15,15 +16,21 @@ object CHomeCommand {
     fun init(){
         CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, environment ->
             dispatcher.register(
-
                 CommandManager.literal("chome")
                     .then(
                         CommandManager.literal("home")
+                            .requires({source -> ConfigHandler.CONFIG.chome.enabled})
                             .executes(homeCommand)
                     )
                     .then(
                         CommandManager.literal("sethome")
+                            .requires({source -> ConfigHandler.CONFIG.chome.enabled})
                             .executes(sethomeCommand)
+                    )
+                    .then(
+                        CommandManager.literal("reload")
+                            .requires({source -> source.hasPermissionLevel(3)})
+                            .executes(reloadCommand)
                     )
                     .executes(helpCommand)
             )
@@ -43,7 +50,7 @@ object CHomeCommand {
             if (damageCooldown != null) {
                 context.source.sendFeedback({
                     Text.literal("You last took damage ${String.format("%.1f", damageCooldown)} seconds ago. " +
-                            "Please wait for ${DamageTracker.DAMAGECOOLDOWN} seconds to pass.")
+                            "Please wait for ${ConfigHandler.CONFIG.chome.cooldown} seconds to pass.")
                 }, true)
                 return 1
             }
@@ -102,6 +109,23 @@ object CHomeCommand {
     }
 
     val sethomeCommand = Command(CHomeCommand::executeSethome)
+
+    private fun executeReload(context: CommandContext<ServerCommandSource>): Int {
+        try {
+            ConfigHandler.load()
+        } catch (e: Exception) {
+            context.source.sendFeedback({
+                Text.literal("An error occured: ${e.message}")
+            }, true)
+        }
+
+        context.source.sendFeedback({
+            Text.literal("Config reloaded successfully")
+        }, true)
+        return 1
+    }
+
+    val reloadCommand = Command(CHomeCommand::executeReload)
 
     private fun executeHelp(context: CommandContext<ServerCommandSource>): Int {
         context.source.sendFeedback({

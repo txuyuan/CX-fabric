@@ -1,15 +1,11 @@
 package me.xuyuan.cx.utils
 
 import net.minecraft.server.network.ServerPlayerEntity
-import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
 
 object DamageTracker {
-    // TODO: Refactor to config file
-    const val DAMAGECOOLDOWN = 20
-
     // Main record store, kept in memory
     val damageEvents: MutableMap<UUID, LocalDateTime> = mutableMapOf()
 
@@ -24,7 +20,7 @@ object DamageTracker {
             val recordEpoch = datetime.atZone(zoneId).toInstant().toEpochMilli()
             val diff = (nowEpoch - recordEpoch).toDouble() / 1000
 
-            if (diff > DAMAGECOOLDOWN){
+            if (diff > ConfigHandler.CONFIG.chome.cooldown){
                 damageEvents.remove(uuid)
             }
         }
@@ -33,9 +29,6 @@ object DamageTracker {
         val now = LocalDateTime.now()
         damageEvents[player.uuid] = now
         cleanHistory()
-
-        val logger = LoggerFactory.getLogger("cx")
-        logger.info(damageEvents.toString())
     }
 
     fun getRemainingCooldown(player: ServerPlayerEntity): Double? {
@@ -50,7 +43,7 @@ object DamageTracker {
             val diff = (nowEpoch - lastDamagedEpoch).toDouble() / 1000
 
             // Calculate cooldown
-            if (diff < DAMAGECOOLDOWN){
+            if (diff < ConfigHandler.CONFIG.chome.cooldown){
                 return diff
             }
         }
