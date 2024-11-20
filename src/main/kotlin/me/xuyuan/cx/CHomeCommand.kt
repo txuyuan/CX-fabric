@@ -1,8 +1,9 @@
-package me.xuyuan.cx.commands
+package me.xuyuan.cx
 
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.context.CommandContext
 import me.xuyuan.cx.utils.CHomeStateHandler
+import me.xuyuan.cx.utils.DamageTracker
 import me.xuyuan.cx.visuals.TeleportParticles
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.server.command.CommandManager
@@ -14,6 +15,7 @@ object CHomeCommand {
     fun init(){
         CommandRegistrationCallback.EVENT.register { dispatcher, registryAccess, environment ->
             dispatcher.register(
+
                 CommandManager.literal("chome")
                     .then(
                         CommandManager.literal("home")
@@ -35,23 +37,31 @@ object CHomeCommand {
             val logger = LoggerFactory.getLogger("cx")
             logger.info("${context.source.name}: Teleported to their home")
 
-            // Execute teleport
+            // Check damage
             val player = context.source.player!!
-            val home = CHomeStateHandler.getHome(player)
+            val damageCooldown = DamageTracker.getRemainingCooldown(player!!)
+            if (damageCooldown != null) {
+                context.source.sendFeedback({
+                    Text.literal("You last took damage ${String.format("%.1f", damageCooldown)} seconds ago. " +
+                            "Please wait for ${DamageTracker.DAMAGECOOLDOWN} seconds to pass.")
+                }, true)
+                return 1
+            }
 
             // Check for existence of home
-            if (home != null) {
-                player.teleport(home.x, home.y, home.z, true)
-
-                // Return feedback
-                context.source.sendFeedback({
-                    Text.literal("Teleported to home")
-                }, false)
-            } else {
+            val home = CHomeStateHandler.getHome(player)
+            if (home == null) {
                 context.source.sendFeedback({
                     Text.literal("You have not set your home. Use /chome sethome at your preferred home")
                 }, false)
+                return 1
             }
+
+            player.teleport(home.x, home.y, home.z, true)
+
+            context.source.sendFeedback({
+                Text.literal("Teleported to home")
+            }, false)
 
         } catch (e: Exception) {
             context.source.sendFeedback({
@@ -75,10 +85,9 @@ object CHomeCommand {
             val pos = player.pos
             CHomeStateHandler.saveHome(player, pos)
 
-            // Spawn particles
+            // Spawn fancy particles
             TeleportParticles.spawn(player)
 
-            // Return feedback
             context.source.sendFeedback({
                 Text.literal("Set your home")
             }, false)

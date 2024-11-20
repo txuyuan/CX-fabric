@@ -1,6 +1,5 @@
 package me.xuyuan.cx
 
-import me.xuyuan.cx.commands.CHomeCommand
 import net.fabricmc.api.ModInitializer
 import org.slf4j.LoggerFactory
 
@@ -12,6 +11,7 @@ object CX : ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		CHomeCommand.init()
+		AttackListener.init()
 		logger.info("Initialised CX")
 	}
 }
