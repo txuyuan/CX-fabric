@@ -11,6 +11,7 @@ import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
 import org.slf4j.LoggerFactory
+import kotlin.math.log
 
 object CHomeCommand {
     fun init(){
@@ -47,6 +48,9 @@ object CHomeCommand {
             // Check damage
             val player = context.source.player!!
             val damageCooldown = DamageTracker.getRemainingCooldown(player!!)
+            if (ConfigHandler.CONFIG.debug) {
+                logger.info("Player ${player.name} on cooldown $damageCooldown")
+            }
             if (damageCooldown != null) {
                 context.source.sendFeedback({
                     Text.literal("You last took damage ${String.format("%.1f", damageCooldown)} seconds ago. " +
@@ -62,6 +66,10 @@ object CHomeCommand {
                     Text.literal("You have not set your home. Use /chome sethome at your preferred home")
                 }, false)
                 return 1
+            }
+
+            if (ConfigHandler.CONFIG.debug) {
+                logger.info("Fetched home for ${player}: ${home}")
             }
 
             player.teleport(home.x, home.y, home.z, true)
@@ -91,6 +99,10 @@ object CHomeCommand {
             val player = context.source.player!!
             val pos = player.pos
             HomeStoreHandler.saveHome(player, pos)
+
+            if (ConfigHandler.CONFIG.debug) {
+                logger.info("Set home for ${player.name}: ${pos}")
+            }
 
             // Spawn fancy particles
             TeleportParticles.spawn(player)

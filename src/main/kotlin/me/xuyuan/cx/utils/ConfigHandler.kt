@@ -6,13 +6,13 @@ import kotlinx.serialization.json.Json
 import org.apache.logging.log4j.core.config.ConfigurationException
 import org.slf4j.LoggerFactory
 import java.io.File
-import kotlin.math.log
 
 object ConfigHandler {
 
     @Serializable
     data class Config(
-        val chome: CHome
+        val chome: CHome,
+        val debug: Boolean
     )
 
     @Serializable
@@ -25,7 +25,8 @@ object ConfigHandler {
         chome = CHome(
             enabled = true,
             cooldown = 20
-        )
+        ),
+        debug = false
     )
 
     private fun createDefaultFile(configFile: File){
